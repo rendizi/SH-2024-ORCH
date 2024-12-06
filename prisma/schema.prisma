@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  email String @unique
+  password String 
+  telegrams Telegram[]
+  services Service[]
+  createdAt DateTime @default(now())
+}
+
+model Telegram{
+  id Int @id @default(autoincrement())
+  telegramId Int 
+  userId Int 
+  user User @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Service{
+  id Int @id @default(autoincrement())
+  ip String 
+  domain String 
+  userId Int 
+  user User @relation(fields: [userId], references: [id])
+  reports Report[]
+  technologies Technology[]
+  createdAt DateTime @default(now())
+}
+
+model Technology{
+  id Int @id @default(autoincrement())
+  name String 
+  serviceId Int 
+  service Service @relation(fields: [serviceId], references: [id])
+}
+
+model Exploit{
+  id Int @id @default(autoincrement())
+  vulnerability_id String 
+  title String 
+  description String 
+  publication_date String 
+  source_link String 
+  score Float 
+  type String 
+  reports Report[]
+  createdAt DateTime @default(now())
+}
+
+model Report{
+  id Int @id @default(autoincrement())
+  exploitId Int 
+  exploit Exploit @relation(fields: [exploitId], references: [id])
+  serviceId Int 
+  service Service @relation(fields: [serviceId], references: [id])
+  agentId Int 
+  agent Agent @relation(fields: [agentId], references: [id])
+  verdict String 
+  steps Step[]
+  createdAt DateTime @default(now())
+}
+
+model Step{
+  id Int @id @default(autoincrement())
+  reportId Int 
+  report Report @relation(fields: [reportId], references: [id])
+  command String 
+  output String 
+  ranAt DateTime 
+}
+
+model Agent{
+  id Int @id @default(autoincrement())
+  ip String 
+  status String 
+  lastActive DateTime
+  reports Report[]
+  createdAt DateTime @default(now())
+}
