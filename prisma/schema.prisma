@@ -50,7 +50,7 @@ model Technology{
 
 model Exploit{
   id Int @id @default(autoincrement())
-  vulnerability_id String 
+  vulnerability_id String  @unique
   title String 
   description String 
   publication_date String 

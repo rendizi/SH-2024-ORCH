@@ -97,6 +97,7 @@ botRouter.post("/verdict", authMiddleware, async (req: AuthenticatedRequest, res
           where: { id: user.current }, 
           data: { verdict }, 
         });
+        
     
         res.status(200).send({ message: "Verdict updated successfully", updatedReport });
       } catch (error) {
