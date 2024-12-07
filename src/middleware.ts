@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 export interface AuthenticatedRequest extends Request {
   user?: any; 

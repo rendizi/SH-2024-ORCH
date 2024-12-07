@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 import prisma from "./prisma";
 import { Prisma } from "@prisma/client";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { AuthenticatedRequest, authMiddleware } from "./middleware";
 import { exec } from "child_process";
