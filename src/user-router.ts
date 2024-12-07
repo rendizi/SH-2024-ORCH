@@ -5,8 +5,8 @@ import jwt from "jsonwebtoken";
 import { AuthenticatedRequest, authMiddleware } from "./middleware";
 const userRouter = Router()
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "access-secret";
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refresh-secret";
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || "LOL";
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "LOL";
 
 const refreshTokens: string[] = [];
 

@@ -12,7 +12,8 @@ cron.schedule("0 0 * * *", async () => {
     } catch (error) {
       console.error("Error running fetchLatest:", error);
     }
-  });const app = express();
+  });
+const app = express();
 const PORT = 4000;
 
 app.use(express.json());
