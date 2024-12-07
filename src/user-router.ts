@@ -231,6 +231,207 @@ userRouter.get("/service/technologies/:serviceId", async (req: Request, res: Res
     }
   });
   
+  userRouter.get("/vulnerabilities/count", async (req: Request, res: Response) => {
+    try {
+      const { userId, serviceId } = req.query;
+  
+      const whereClause: any = {};
+      if (userId) {
+        whereClause.service = {
+          userId: parseInt(userId as string, 10),
+        };
+      }
+      if (serviceId) {
+        whereClause.serviceId = parseInt(serviceId as string, 10);
+      }
 
+      const allVulnCount = await prisma.report.count();
+      const potentialVulnCount = await prisma.report.count({
+        where: { verdict: "potential vulnerability",...whereClause  },
+      });
+      const realVulnCount = await prisma.report.count({
+        where: { verdict: "real vulnerability",...whereClause },
+      });
+      const noVulnCount = await prisma.report.count({
+        where: { verdict: "no vulnerability",...whereClause },
+      });
+  
+      res.status(200).json({
+        allVulnCount,
+        potentialVulnCount,
+        realVulnCount,
+        noVulnCount,
+      });
+    } catch (error) {
+      console.error("Error fetching vulnerability counts:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  userRouter.get("/vulnerabilities/by-days", async (req: Request, res: Response) => {
+    try {
+      const { userId, serviceId } = req.query;
+  
+      const whereClause: any = {};
+      if (userId) {
+        whereClause.service = {
+          userId: parseInt(userId as string, 10),
+        };
+      }
+      if (serviceId) {
+        whereClause.serviceId = parseInt(serviceId as string, 10);
+      }
+  
+      const vulnerabilitiesByDays = await prisma.report.groupBy({
+        by: ["createdAt"],
+        where: whereClause,
+        _count: { id: true },
+        orderBy: { createdAt: "asc" },
+      });
+  
+      res.status(200).json(vulnerabilitiesByDays);
+    } catch (error) {
+      console.error("Error fetching vulnerabilities by days:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+
+  userRouter.get("/service/vulnerabilities", async (req: Request, res: Response) => {
+    try {
+      const { serviceId } = req.query;
+  
+      const vulnerabilities = await prisma.report.findMany({
+        where: {
+          serviceId: serviceId ? parseInt(serviceId as string, 10) : undefined,
+        },
+        include: {
+          service: true,
+          exploit: true,
+        },
+      });
+
+  
+      res.status(200).json(vulnerabilities);
+    } catch (error) {
+      console.error("Error fetching service vulnerabilities:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  userRouter.get("/reports/:reportId/history", async (req: Request, res: Response) => {
+    try {
+      const { reportId } = req.params;
+  
+      const steps = await prisma.step.findMany({
+        where: { reportId: parseInt(reportId, 10) },
+        select: {
+          command: true,
+          output: true,
+          ranAt: true,
+        },
+      });
+  
+      res.status(200).json(steps);
+    } catch (error) {
+      console.error("Error fetching report history:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  
+  userRouter.get("/services", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+  
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+  
+      const services = await prisma.service.findMany({
+        where: { userId },
+        include: {
+          technologies: true,
+          reports: true,
+        },
+      });
+  
+      if (services.length === 0) {
+        res.status(404).json({ message: "No services found for the user." });
+        return;
+      }
+  
+      res.status(200).json({ services });
+    } catch (error) {
+      console.error("Error fetching user services:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  userRouter.get("/me", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+  
+      if (!userId) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+  
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          services: true,
+          telegrams: true,
+        },
+      });
+  
+      if (!user) {
+        res.status(404).json({ message: "User not found." });
+        return;
+      }
+  
+      res.status(200).json({ user });
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  userRouter.get("/exploits", async (req: Request, res: Response) => {
+    try {
+      const { page = 1, limit = 10 } = req.query;
+  
+      // Convert page and limit to numbers
+      const pageNumber = parseInt(page as string, 10);
+      const limitNumber = parseInt(limit as string, 10);
+  
+      if (pageNumber < 1 || limitNumber < 1) {
+        res.status(400).json({ message: "Page and limit must be positive integers" });
+        return 
+      }
+  
+      const totalExploits = await prisma.exploit.count();
+  
+      const exploits = await prisma.exploit.findMany({
+        skip: (pageNumber - 1) * limitNumber,
+        take: limitNumber,
+        orderBy: { createdAt: "desc" }, // Sort by latest created
+      });
+  
+      res.status(200).json({
+        total: totalExploits,
+        page: pageNumber,
+        limit: limitNumber,
+        totalPages: Math.ceil(totalExploits / limitNumber),
+        exploits,
+      });
+    } catch (error) {
+      console.error("Error fetching paginated exploits:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+  
 
 export default userRouter
