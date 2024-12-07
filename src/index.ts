@@ -4,9 +4,16 @@ import cron from "node-cron";
 import { de, fetchLatest } from "./exploit";
 import userRouter from "./user-router";
 
-// fetchLatest()
-const app = express();
-const PORT = 3000;
+cron.schedule("0 0 * * *", async () => {
+    try {
+      console.log("Running fetchLatest at midnight...");
+      await fetchLatest();
+      console.log("fetchLatest completed successfully.");
+    } catch (error) {
+      console.error("Error running fetchLatest:", error);
+    }
+  });const app = express();
+const PORT = 4000;
 
 app.use(express.json());
 
