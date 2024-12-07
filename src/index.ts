@@ -3,7 +3,7 @@ import botRouter from "./bot-router";
 import cron from "node-cron";
 import { de, fetchLatest } from "./exploit";
 import userRouter from "./user-router";
-
+import cors from "cors"
 cron.schedule("0 0 * * *", async () => {
     try {
       console.log("Running fetchLatest at midnight...");
@@ -16,6 +16,7 @@ cron.schedule("0 0 * * *", async () => {
 const PORT = 4000;
 
 app.use(express.json());
+app.use(cors())
 
 app.use("/bot", botRouter)
 app.use("/user", userRouter)
