@@ -28,8 +28,6 @@ botRouter.post("/register", async (req: Request, res: Response) => {
     };
 
     try {
-        const hashedSecret = await bcrypt.hash(secretKey, 10);
-
         const newBot = await prisma.agent.create({
             data: botInfo, 
         });
@@ -41,7 +39,7 @@ botRouter.post("/register", async (req: Request, res: Response) => {
               status: newBot.status,
               current: 0
             },
-            hashedSecret, 
+            secretKey, 
             { expiresIn: "30d" } 
           );
 
@@ -86,6 +84,7 @@ botRouter.post("/execution", authMiddleware, async (req: AuthenticatedRequest, r
 botRouter.post("/verdict", authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
     const {verdict} = req.body 
     const user = req.user
+    console.log(user)
 
     if (!user.current){
         res.status(403).send({ error: "Invalid user current" });
@@ -97,7 +96,7 @@ botRouter.post("/verdict", authMiddleware, async (req: AuthenticatedRequest, res
           where: { id: user.current }, 
           data: { verdict }, 
         });
-        
+
     
         res.status(200).send({ message: "Verdict updated successfully", updatedReport });
       } catch (error) {
