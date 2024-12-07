@@ -66,7 +66,7 @@ userRouter.post("/login", async(req: Request, res: Response)=>{
           return 
         }
     
-        const accessToken = jwt.sign({ userId: user.id }, ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+        const accessToken = jwt.sign({ userId: user.id }, ACCESS_TOKEN_SECRET, { expiresIn: "8h" });
         const refreshToken = jwt.sign({ userId: user.id }, REFRESH_TOKEN_SECRET);
     
         refreshTokens.push(refreshToken);
@@ -98,7 +98,7 @@ userRouter.post("/refresh-token", async(req: Request, res: Response)=>{
             return 
           }
     
-          const newAccessToken = jwt.sign({ userId: user.userId }, ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+          const newAccessToken = jwt.sign({ userId: user.userId }, ACCESS_TOKEN_SECRET, { expiresIn: "8h" });
           res.status(200).json({ accessToken: newAccessToken });
         });
       } catch (error) {
