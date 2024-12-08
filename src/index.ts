@@ -4,6 +4,8 @@ import cron from "node-cron";
 import { de, fetchLatest } from "./exploit";
 import userRouter from "./user-router";
 import cors from "cors"
+
+fetchLatest()
 cron.schedule("0 0 * * *", async () => {
     try {
       console.log("Running fetchLatest at midnight...");
