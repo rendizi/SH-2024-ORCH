@@ -80,9 +80,15 @@ userRouter.post("/login", async(req: Request, res: Response)=>{
 
 userRouter.post("/telegram", async(req: Request, res: Response) => {
   try{
-    const {telegramId, email} = req.body
+    const {telegramId, email} = req.body 
+    console.log(telegramId, email)
     const user = await prisma.user.findFirst({where:{email}})
+    if (!user){
+      res.status(500).json({ message: "Internal server Lol" });
+      return 
+    }
     await prisma.telegram.create({data: {telegramId, user:{connect:{id: user?.id}}}})
+    res.status(200).json({ message: "success" });
   }catch(err){
     console.error("Error refreshing token:", err);
     res.status(500).json({ message: "Internal server error" });
