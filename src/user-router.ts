@@ -78,7 +78,7 @@ userRouter.post("/login", async(req: Request, res: Response)=>{
       }
 })
 
-userRouter.post("telegram", async(req: Request, res: Response) => {
+userRouter.post("/telegram", async(req: Request, res: Response) => {
   try{
     const {telegramId, email} = req.body
     const user = await prisma.user.findFirst({where:{email}})
